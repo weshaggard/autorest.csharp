@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Filter" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="YamlDotNet.Signed" Version="4.2.1" />
+    <PackageReference Include="YamlDotNet" Version="5.2.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0-preview-20170810-02" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
@@ -39,10 +39,6 @@
   </ItemGroup>
  
   <ItemGroup>
-    <Reference Include="autorest.modeler">
-      <HintPath>$(SolutionDir)\node_modules\@microsoft.azure\autorest.modeler\src\bin\netcoreapp2.0\autorest.modeler.dll</HintPath>
-      <!-- <HintPath>C:\work\oneautorest\autorest.modeler\src\bin\netcoreapp2.0\autorest.modeler.dll</HintPath> -->
-    </Reference>
     <ProjectReference Include="$(SolutionDir)src/autorest.csharp.csproj" />
   </ItemGroup>
  

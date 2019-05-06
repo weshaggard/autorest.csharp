@@ -30,8 +30,13 @@ namespace AutoRest.CSharp
         {
             if(args != null && args.Length > 0 && args[0] == "--server") {
                 var connection = new Connection(Console.OpenStandardOutput(), Console.OpenStandardInput());
-                connection.Dispatch<IEnumerable<string>>("GetPluginNames", async () => new []{ "jsonrpcclient", "csharp", "csharp-simplifier" });
-                connection.Dispatch<string, string, bool>("Process", (plugin, sessionId) => new Program(connection, plugin, sessionId).Process());
+                connection.Dispatch<IEnumerable<string>>("GetPluginNames", async () => new []{ "jsonrpcclient", "csharp", "csharp-simplifier" ,  "imodeler2" });
+                connection.Dispatch<string, string, bool>("Process", (plugin, sessionId) => {
+                    if( plugin == "imodeler2") {
+                        return  new  AutoRest.Modeler.ModelerPlugin(connection, plugin, sessionId).Process();
+                    } 
+                    return new Program(connection, plugin, sessionId).Process();
+                });
                 connection.DispatchNotification("Shutdown", connection.Stop);
 
                 // wait for something to do.

@@ -25,19 +25,21 @@ directive:
 # AutoRest extension configuration
 
 ``` yaml
-use-extension:
-  "@microsoft.azure/autorest.modeler": "2.3.55" # keep in sync with package.json's dev dependency in order to have meaningful tests
+load-priority: 1000
+enable-multi-api: true
+try-require:
+ - ./readme.enable-multi-api.md
 
 skip-simplifier-on-namespace: 
   - System.Security.Permissions
 
 pipeline:
-  csharp/imodeler1:
+  csharp/imodeler2:
     input: openapi-document/identity
     output-artifact: code-model-v1
     scope: csharp
   csharp/commonmarker:
-    input: imodeler1
+    input: imodeler2
     output-artifact: code-model-v1
   csharp/cm/transform:
     input: commonmarker
@@ -72,13 +74,13 @@ output-artifact:
 
 ``` yaml
 pipeline:
-  jsonrpcclient/imodeler1:
+  jsonrpcclient/imodeler2:
     input: openapi-document/identity
     output-artifact: code-model-v1
     scope: jsonrpcclient
   jsonrpcclient/generate:
     plugin: jsonrpcclient
-    input: imodeler1
+    input: imodeler2
     output-artifact: source-file-jsonrpcclient
   jsonrpcclient/transform:
     input: generate
