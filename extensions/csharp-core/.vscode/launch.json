@@ -1,0 +1,22 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Xkcd",
+      "autoAttachChildProcesses": true,
+      "program": "${env:appdata}/npm/node_modules/autorest/entrypoints/app.js",
+      "args": [
+        "--use=${workspaceFolder}",
+        "--input-file=${workspaceFolder}/../../samples/xkcd/xkcd.yaml",
+        "--csharp-core.debugger"
+      ],
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
+..
