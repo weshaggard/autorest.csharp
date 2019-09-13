@@ -7,6 +7,14 @@ import {
   AutoRestExtension,
   Channel
 } from "@microsoft.azure/autorest-extension-base";
+import { IProject, ILogger } from "./codegen/models";
+import { create as createServiceModel } from "./codegen/serviceModel";
+import { generate } from "./codegen/generator";
+//import { ModelState } from "@microsoft.azure/autorest.remodeler";
+//import { Model } from "@microsoft.azure/autorest.codemodel-v3";
+import { ModelState, codemodel } from "@microsoft.azure/autorest.codemodel-v3";
+import { join } from "path";
+import { resolveFullPath } from "@microsoft.azure/codegen";
 
 require("source-map-support").install();
 
@@ -20,13 +28,48 @@ export async function main() {
       inputFileUris.map(uri => autoRestApi.ReadFile(uri))
     );
 
-    autoRestApi.Message({
-      Channel: Channel.Information,
-      Text:
-        "AutoRest offers the following input files: " + inputFiles.join(", ")
-    });
-    // emit a file (all input files concatenated)
-    autoRestApi.WriteFile("concat.txt", inputFiles.join("\n---\n"));
+    const logger: ILogger = {
+      log(message: string): void {
+        autoRestApi.Message({ Channel: Channel.Information, Text: message });
+      },
+      warn(message: string): void {
+        autoRestApi.Message({ Channel: Channel.Warning, Text: message });
+      },
+      error(message: string): void {
+        autoRestApi.Message({ Channel: Channel.Error, Text: message });
+      },
+      verbose(message: string): void {
+        autoRestApi.Message({ Channel: Channel.Verbose, Text: message });
+      }
+    };
+
+    const project: IProject = {
+      settings: {
+        "input-file": await autoRestApi.GetValue("input-file"),
+        "output-file": await autoRestApi.GetValue("output-folder"),
+        "clear-output-folder": await autoRestApi.GetValue("clear-out-folder"),
+        "azure-track2-csharp": await autoRestApi.GetValue("azure-track2-csharp")
+      },
+      //swagger: inputFiles,
+      state: await new ModelState<codemodel.Model>(autoRestApi).init(),
+      // cache: {
+      //   parameters: {},
+      //   definitions: {},
+      //   responses: {},
+      //   customTypes: {},
+      //   voidType: { type: "void", external: true, extendedHeaders: [] }
+      // },
+      logger: logger
+    };
+
+    const model = await createServiceModel(project);
+
+    let [filename, filecontents] = generate(model);
+    //filename = join(await autoRestApi.GetValue("output-folder"), filename);
+    autoRestApi.WriteFile(filename, filecontents);
+    //undefined,
+    //"source-file-csharp"
+    //);
   });
 
   await extension.Run();
