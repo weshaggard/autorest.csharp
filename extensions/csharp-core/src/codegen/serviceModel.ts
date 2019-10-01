@@ -39,6 +39,7 @@ import {
   Schema,
   JsonType
 } from "@microsoft.azure/autorest.codemodel-v3";
+import { Dictionary } from "@microsoft.azure/codegen";
 
 //Info.prototype. = function (key: string) => {
 //  this.extensio
@@ -113,6 +114,29 @@ export async function create(project: IProject): Promise<IServiceModel> {
   for (const [name, operation] of <[string, IOperation][]>(
     Object.entries(service.operations)
   )) {
+    // Get the name and group
+    let opName = operation.operationId;
+    let group: string | undefined = undefined;
+    const parts = opName.split(/_/g);
+    switch (parts.length) {
+      case 1:
+        break;
+      case 2:
+        group = parts[0];
+        opName = parts[1];
+        break;
+      default:
+        throw `Operation ID can only have two parts, not ${opName}`;
+    }
+
+    if (!group) group = "default";
+
+    let opGroup = service.groups[group];
+    if (!opGroup) {
+      opGroup = service.groups[group] = {};
+    }
+    opGroup[opName] = operation;
+
     operation.parameters.splice(
       0,
       0,
@@ -122,7 +146,7 @@ export async function create(project: IProject): Promise<IServiceModel> {
         ImplementationLocation.Method,
         {
           allowEmptyValue: false,
-          description: "pipeline",
+          description: "The pipeline used for sending requests.",
           deprecated: false,
           style: EncodingStyle.Simple,
           explode: false,
@@ -205,12 +229,8 @@ function todo(project: IProject, fn: () => any, location?: string): void {
   }
 }
 
-function generationSetting<T>(info: Info, key: string): T | undefined {
-  let generationSetting = info.extensions[`x-ms-code-generation-settings`];
-  if (generationSetting) {
-    return generationSetting[key];
-  }
-  return undefined;
+function generationSetting<T>(project: IProject, key: string): T | undefined {
+  return project.settings[key];
 }
 
 // Look up a parameter in the global cache
@@ -324,7 +344,7 @@ function createServiceInfo(project: IProject): IServiceInfo {
   // via components.
   // const collapseResourceUris = optional(
   //   () =>
-  //     generationSetting(project.state.model.info,
+  //     generationSetting(project,
   //       `x-ms-skip-path-components`
   //     ]
   // );
@@ -417,10 +437,7 @@ function createServiceInfo(project: IProject): IServiceInfo {
     project.logger.verbose(`project.state.model.security is being ignored`);
   }
 
-  let isPublic: boolean | undefined = generationSetting(
-    project.state.model.info,
-    `x-ms-public`
-  );
+  let isPublic: boolean | undefined = generationSetting(project, `x-az-public`);
   if (isPublic === undefined) {
     isPublic = true;
   }
@@ -431,26 +448,17 @@ function createServiceInfo(project: IProject): IServiceInfo {
     title: title,
     description: project.state.model.info.description,
     extensionsName: optional(
-      () =>
-        generationSetting(project.state.model.info, `client-extensions-name`),
+      () => generationSetting(project, `client-extensions-name`),
       title + " Extensions"
     ),
     modelFactoryName: optional(
-      () =>
-        generationSetting(
-          project.state.model.info,
-          `client-model-factory-name`
-        ),
+      () => generationSetting(project, `client-model-factory-name`),
       title + " ModelFactory"
     ),
     version: project.state.model.info.version,
     public: isPublic,
     sync: optional(
-      () =>
-        generationSetting(
-          project.state.model.info,
-          `x-ms-include-sync-methods`
-        ),
+      () => generationSetting(project, `x-az-include-sync-methods`),
       false
     ),
     consumes: [`application/xml`],
@@ -906,11 +914,11 @@ license information.`
 
 function createService(project: IProject, info: IServiceInfo): IService {
   let name: string = optional(
-    () => generationSetting(project.state.model.info, `client-name`),
+    () => generationSetting(project, `client-name`),
     naming.pascalCase(project.state.model.info.title)
   );
   let namespace: string = optional(
-    () => generationSetting(project.state.model.info, `namespace`),
+    () => generationSetting(project, `namespace`),
     "DefaultNS." + name
   );
 

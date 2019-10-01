@@ -205,7 +205,7 @@ export type IXmlSettings = XML;
 // }
 
 export function isEnumType(model: IModelType) {
-  return model.enum !== undefined;
+  return model.enum !== undefined && model.enum.length > 0;
 }
 
 export function isStringEnumType(model: IModelType) {

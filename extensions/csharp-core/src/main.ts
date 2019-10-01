@@ -48,7 +48,24 @@ export async function main() {
         "input-file": await autoRestApi.GetValue("input-file"),
         "output-file": await autoRestApi.GetValue("output-folder"),
         "clear-output-folder": await autoRestApi.GetValue("clear-out-folder"),
-        "azure-track2-csharp": await autoRestApi.GetValue("azure-track2-csharp")
+        "azure-track2-csharp": await autoRestApi.GetValue(
+          "azure-track2-csharp"
+        ),
+        namespace: await autoRestApi.GetValue("namespace"),
+        "client-name": await autoRestApi.GetValue("client-name"),
+        "client-extensions-name": await autoRestApi.GetValue(
+          "client-extensions-name"
+        ),
+        "client-model-factory-name": await autoRestApi.GetValue(
+          "namespclient-model-factory-nameace"
+        ),
+        "x-az-skip-path-components": await autoRestApi.GetValue(
+          "x-az-skip-path-components"
+        ),
+        "x-az-include-sync-methods": await autoRestApi.GetValue(
+          "x-az-include-sync-methods"
+        ),
+        "x-az-public": await autoRestApi.GetValue("x-az-public")
       },
       //swagger: inputFiles,
       state: await new ModelState<codemodel.Model>(autoRestApi).init(),
@@ -66,10 +83,12 @@ export async function main() {
 
     let [filename, filecontents] = generate(model);
     //filename = join(await autoRestApi.GetValue("output-folder"), filename);
-    autoRestApi.WriteFile(filename, filecontents);
-    //undefined,
-    //"source-file-csharp"
-    //);
+    autoRestApi.WriteFile(
+      filename,
+      filecontents,
+      undefined,
+      "source-file-csharp"
+    );
   });
 
   await extension.Run();

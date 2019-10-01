@@ -38,7 +38,13 @@ export function getName2(schema: Schema): string {
       return "double";
 
     case JsonType.Object:
-      return /* namespace */ `${naming.type(type)}`;
+      let typeName = naming.type(schema.details.default.name);
+      if (schema.details.default.namespace) {
+        typeName = `${naming.namespace(
+          schema.details.default.namespace
+        )}.${typeName}`;
+      }
+      return typeName;
 
     case JsonType.String:
       switch (schema.format) {
@@ -66,51 +72,59 @@ export function getName(
   readonly?: boolean,
   isParam?: boolean
 ): string {
-  let type: JsonType = model.type || JsonType.Object;
-  if (isEnumType(model) && model.enum.length === 1) {
-    return `string`;
-  } else if (isEnumType(model) || isObjectType(model)) {
-    return /*`${naming.namespace(model.namespace)}.*/ `${naming.type(type)}`;
-  } else if (isPrimitiveType(model)) {
-    switch (type.toLowerCase()) {
-      case "integer":
-      case "int32":
-        return "int";
-      case "int64":
-        return "long";
-      case "number":
-        return "double";
-      case "boolean":
-        return "bool";
-      case "byte":
-        return "byte[]"; // ?
-      case "binary":
-      case "file":
-        return "System.IO.Stream";
-      case "url":
-        return "System.Uri";
-      case "etag":
-        return "Azure.Core.Http.ETag";
-      case "date":
-        return "System.DateTime";
-      case "date-time":
-      case "date-time-8601":
-      case "date-time-rfc1123":
-        return "System.DateTimeOffset"; // ?
-      case "dictionary":
-        return "System.Collections.Generic.IDictionary<string, string>";
-      case "array":
-        const elementType = model.items
-          ? getName(model.items, readonly)
-          : "object";
-        return isParam
-          ? `System.Collections.Generic.IEnumerable<${elementType}>`
-          : readonly === false
-          ? `System.Collections.Generic.IList<${elementType}>`
-          : `System.Collections.Generic.IEnumerable<${elementType}>`; // Consider switching back to something like IReadOnlyLIst
-    }
-  }
-  return model.type || "UNKNOWN TYPE NAME";
+  return getName2(model);
+
+  // let type: JsonType = model.type || JsonType.Object;
+  // if (isEnumType(model) && model.enum.length === 1) {
+  //   return `string`;
+  // } else if (isEnumType(model) || isObjectType(model)) {
+  //   let typeName = naming.type(model.details.default.name);
+  //   if (model.details.default.namespace) {
+  //     typeName = `${naming.namespace(
+  //       model.details.default.namespace
+  //     )}.${typeName}`;
+  //   }
+  //   return typeName;
+  // } else if (isPrimitiveType(model)) {
+  //   switch (type.toLowerCase()) {
+  //     case "integer":
+  //     case "int32":
+  //       return "int";
+  //     case "int64":
+  //       return "long";
+  //     case "number":
+  //       return "double";
+  //     case "boolean":
+  //       return "bool";
+  //     case "byte":
+  //       return "byte[]"; // ?
+  //     case "binary":
+  //     case "file":
+  //       return "System.IO.Stream";
+  //     case "url":
+  //       return "System.Uri";
+  //     case "etag":
+  //       return "Azure.Core.Http.ETag";
+  //     case "date":
+  //       return "System.DateTime";
+  //     case "date-time":
+  //     case "date-time-8601":
+  //     case "date-time-rfc1123":
+  //       return "System.DateTimeOffset"; // ?
+  //     case "dictionary":
+  //       return "System.Collections.Generic.IDictionary<string, string>";
+  //     case "array":
+  //       const elementType = model.items
+  //         ? getName(model.items, readonly)
+  //         : "object";
+  //       return isParam
+  //         ? `System.Collections.Generic.IEnumerable<${elementType}>`
+  //         : readonly === false
+  //         ? `System.Collections.Generic.IList<${elementType}>`
+  //         : `System.Collections.Generic.IEnumerable<${elementType}>`; // Consider switching back to something like IReadOnlyLIst
+  //   }
+  // }
+  // return model.type || "UNKNOWN TYPE NAME";
 }
 
 export function isValueType(model: IModelType): boolean {

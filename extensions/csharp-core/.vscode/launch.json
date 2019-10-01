@@ -12,11 +12,12 @@
       "program": "${env:appdata}/npm/node_modules/autorest/entrypoints/app.js",
       "args": [
         "--use=${workspaceFolder}",
-        "--input-file=${workspaceFolder}/../../samples/xkcd/xkcd.yaml",
-        "--csharp-core.debugger"
+        "D:\\adp\\autorest.csharp\\samples\\storage-blob\\readme.md",
+        "--csharp-core.debugger",
+        "--debug",
+        "--verbose"
       ],
       "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
-..
