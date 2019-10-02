@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -16,11 +17,6 @@ namespace AutoRest.CSharp.V3
 
         public static async Task<bool> Start(AutoRestInterface autoRest)
         {
-            // AutoRest sends an empty Object as a 'true' value. When the configuration item is not present, it sends a Null value.
-            if ((await autoRest.GetValue<JsonElement?>($"{autoRest.PluginName}.debugger")).IsObject())
-            {
-                DebuggerAwaiter.Await();
-            }
             try
             {
                 var testItem = await autoRest.GetValue<string>("test-item");
