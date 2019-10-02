@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoRest.CSharp.V3.CodeGen;
 using AutoRest.CSharp.V3.Common.JsonRpc;
 using AutoRest.CSharp.V3.Common.Utilities;
 using AutoRest.CSharp.V3.PipelineModels;
@@ -29,6 +30,7 @@ namespace AutoRest.CSharp.V3
                 }
 
                 var codeModel = await autoRest.ReadFile(files.FirstOrDefault());
+
                 //codeModel = String.Join(Environment.NewLine, codeModel.ToLines().Where(l => !l.Contains("uid:")));
                 //codeModel = Regex.Replace(codeModel, @"(.*)!<!.*>(.*)", "$1$2", RegexOptions.Multiline);
                 //codeModel = codeModel.Replace("<!CodeModel>", "<CodeModel>");
@@ -43,11 +45,14 @@ namespace AutoRest.CSharp.V3
 
                 var cmClass = CodeModelDeserializer.CreateCodeModel(codeModel);
 
-                var inputFiles = await autoRest.GetValue<string[]>("input-file");
-                var inputFileMessage = new Message { Channel = Channel.Fatal, Text = inputFiles.FirstOrDefault() };
-                await autoRest.Message(inputFileMessage);
+                var codeGen = new CodeGenerator();
+                var code = codeGen.GenerateModels(cmClass);
 
-                await autoRest.WriteFile("CodeModel-new.yaml", codeModel, "source-file-csharp");
+                //var inputFiles = await autoRest.GetValue<string[]>("input-file");
+                //var inputFileMessage = new Message { Channel = Channel.Fatal, Text = inputFiles.FirstOrDefault() };
+                //await autoRest.Message(inputFileMessage);
+
+                await autoRest.WriteFile("GeneratedCode.cs", code, "source-file-csharp");
                 return true;
             }
             catch (Exception e)

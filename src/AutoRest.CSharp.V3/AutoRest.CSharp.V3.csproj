@@ -27,6 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Testura.Code" Version="0.12.0" />
     <PackageReference Include="YamlDotNet" Version="6.1.2" />
   </ItemGroup>
 
